@@ -57,31 +57,89 @@ export default function form() {
 
     console.log("uniprotid: " + String(data.get('uniprotid')))
     console.log("sequence: " + String(data.get('sequence')))
+    var dict = {};
     if (data.get("IUPred3") == 'on') {
       console.log("IUPred3: True")
+      dict["IUPred3"] = true;
     }
     if (data.get("ESpiritz") == 'on') {
       console.log("ESpiritz: True")
+      dict["ESpiritz"] = true;
     }
     if (data.get("SPOT-DISORDER") == 'on') {
       console.log("SPOT-DISORDER: True")
+      dict["SPOT-DISORDER"] = true;
     }
     if (data.get("flDPnn") == 'on') {
       console.log("flDPnn: True")
+      dict["flDPnn"] = true;
     }
     if (data.get("Disomine") == 'on') {
       console.log("Disomine: True")
+      dict["Disomine"] = true;
     }
     if (data.get("RawMSA") == 'on') {
       console.log("RawMSA: True")
+      dict["RawMSA"] = true;
     }
     if (data.get("Metapredict") == 'on') {
       console.log("Metapredict: True")
+      dict["Metapredict"] = true;
     }
     if (data.get("AlphaFold") == 'on') {
       console.log("AlphaFold: True")
+      dict["AlphaFold"] = true;
     }
-    };
+
+    console.log(Object.keys(data).indexOf('AlphaFold'))
+    
+    const data2 = JSON.stringify(data);
+    const fs = require('fs');
+    // write JSON string to a file
+    fs.writeFile('user.json', data2, (err) => {
+      if (err) {
+          throw err;
+      }
+      console.log("JSON data is saved.");
+    });
+
+    // fetch('/api/response', {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //   },
+    //   body: JSON.stringify({'crns': arrOfNum})
+    // })
+    // .then((response) => response.blob())
+    // .then((blob) => {
+    //   // Create blob link to download
+    //   const url = window.URL.createObjectURL(
+    //     new Blob([blob]),
+    //   );
+    //   const link = document.createElement('a');
+    //   link.href = url;
+    //   // link.target = _self;
+    //   // link.setAttribute('target', '_self');
+    //   link.setAttribute(
+    //     'download',
+    //     `classes.csv`,
+    //   );
+
+    //   // Append to html link element page
+    //   // document.body.appendChild(link);
+
+    //   // Start download
+    //   link.click();
+      
+    //   // Clean up and remove the link
+    //   // link.parentNode.removeChild(link);
+    //   // window.close();
+    //   // const navigate = useNavigate();
+    //   // navigate("/");
+    //   // window.location.reload(false);
+    // });
+
+  };
     
   return (
     <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
