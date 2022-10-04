@@ -11,6 +11,7 @@ import Button from '@mui/material/Button';
 import theme from '../theme';
 import { ThemeProvider } from '@mui/material/styles';
 import Box from '@mui/material/Box';
+import InputSlider from '../components/InputSlider';
 // import InputBase from '@mui/material/InputBase';
 // import Box from '@mui/material/Box';
 // import InputLabel from '@mui/material/InputLabel';
@@ -59,41 +60,42 @@ export default function form() {
     console.log("sequence: " + String(data.get('sequence')))
     dict["uniprotid"] = String(data.get('uniprotid'))
     dict["sequence"] = String(data.get('sequence'))
+    var dict2 = {};
     if (data.get("IUPred3") == 'on') {
       console.log("IUPred3: True")
-      dict["IUPred3"] = true;
+      dict2["IUPred3"] = [true, data.get('IUPred3minscore')];
     }
     if (data.get("ESpiritz") == 'on') {
       console.log("ESpiritz: True")
-      dict["ESpiritz"] = true;
+      dict2["ESpiritz"] = [true];
     }
     if (data.get("SPOT-DISORDER") == 'on') {
       console.log("SPOT-DISORDER: True")
-      dict["SPOT-DISORDER"] = true;
+      dict2["SPOT-DISORDER"] = [true];
     }
     if (data.get("flDPnn") == 'on') {
       console.log("flDPnn: True")
-      dict["flDPnn"] = true;
+      dict2["flDPnn"] = [true];
     }
     if (data.get("Disomine") == 'on') {
       console.log("Disomine: True")
-      dict["Disomine"] = true;
+      dict2["Disomine"] = [true];
     }
     if (data.get("RawMSA") == 'on') {
       console.log("RawMSA: True")
-      dict["RawMSA"] = true;
+      dict2["RawMSA"] = [true];
     }
     if (data.get("Metapredict") == 'on') {
       console.log("Metapredict: True")
-      dict["Metapredict"] = true;
+      dict2["Metapredict"] = [true];
     }
     if (data.get("AlphaFold") == 'on') {
       console.log("AlphaFold: True")
-      dict["AlphaFold"] = true;
+      dict2["AlphaFold"] = [true];
     }
-
+    dict['sequences'] = dict2
     console.log(dict)
-    fetch('/api/response', {
+    fetch('http://localhost:3000/api/response', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -142,6 +144,7 @@ export default function form() {
             <Stack spacing={2}>
               <Stack direction="row" spacing={3}>
                 <FormControlLabel name="IUPred3" control={<Checkbox/>} label="IUPred3" />
+                <InputSlider/>
                 <FormControlLabel name='ESpiritz' control={<Checkbox/>} label="ESpiritz" />
                 <FormControlLabel control={<Checkbox/>} name='SPOT-DISORDER' label="SPOT-DISORDER" />
               </Stack>
