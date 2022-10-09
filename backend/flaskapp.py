@@ -12,4 +12,4 @@ def get_reponse():
         df = get_df(uniprotid(response), response['sequences'])
         # print(df)
         # return response
-        return 400
+        return {'success': True}, 200

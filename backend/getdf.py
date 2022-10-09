@@ -16,16 +16,18 @@ def predict(uniprotid, predictor, prvalue):
         returnarray.append(values)
         for num in values:
             if num >= minscore:
-                binaries.append(1)
+                binaries.append(True)
             else:
-                binaries.append(0)
+                binaries.append(False)
         returnarray.append(binaries)
+        # print(str(returnarray) + "fdsf")
         return returnarray
+    # add other predictors here
     pass
 
 def get_df(uniprotid, predictors):
-    print(uniprotid)
-    print(predictors)
+    # print(uniprotid)
+    # print(predictors)
     URL = f"https://mobidb.org/api/download?acc={uniprotid}&format=json"
     response = requests.get(URL)
     jsonresp = response.json()
@@ -34,23 +36,41 @@ def get_df(uniprotid, predictors):
     #     f.write(json.dumps(jsonresp))
 
     proteinname = jsonresp['name']
-    print(proteinname)
-    sequence = jsonresp['sequence']
-    print(sequence)
+    # print(proteinname)
+    sequence = [*jsonresp['sequence']]
+    # print(sequence)
+    # print(sequence)
     length = jsonresp['length']
-    print(length)
-
-    headers = {"Protein Name": [proteinname],
-        "UniProtID": [uniprotid],
-        "Sequence": [sequence],
+    # print(length)
+    organism = jsonresp['organism']
+    # print(organism)
+    headers = {"Protein Name": proteinname,
+        "Organism": organism,
+        "UniProtID": uniprotid,
+        "Sequence": pd.Series(sequence),
         "Length": length,
         }
 
     df = pd.DataFrame(data=headers)
 
-    predcol = []
-    for predictor in predictors:
-        predcol.append(predict(uniprotid, predictor, predictors[predictor]))
+    # predcol = []
+    # print(df)
+    # for predictor in predictors:
+    #     predcol.append(predict(uniprotid, predictor, predictors[predictor]))
 
-    df2 = df.reindex(df.columns.tolist() + list(predictors.keys()),index=1)
+    for predictor in predictors:
+        # print(predict(uniprotid, predictor, predictors[predictor])[0])
+        # print(predict(uniprotid, predictor, predictors[predictor])[1])
+        df[str(predictor)] = pd.Series(predict(uniprotid, predictor, predictors[predictor])[0])
+        df[str(predictor) + " Scores with >=0." + predictors[predictor][1]] = pd.Series(predict(uniprotid, predictor, predictors[predictor])[1])
+
+    # print(predcol)
+    # df2 = df.reindex(df.columns.tolist() + list(predictors.keys()),index=1)
+    # with pd.option_context('display.max_rows', None, 'display.max_columns', None):  # more options can be specified also
+    #     print(df)
+
+
+    pd.set_option('display.max_rows', 500)
+    pd.set_option('display.max_columns', 500)
+    pd.set_option('display.width', 150)
     print(df)
