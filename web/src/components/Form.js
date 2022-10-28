@@ -87,7 +87,7 @@ export default function form() {
     }
     if (data.get("Metapredict") == 'on') {
       console.log("Metapredict: True")
-      dict2["Metapredict"] = [true];
+      dict2["Metapredict"] = [true, data.get('MetaPredictminscore')];
     }
     if (data.get("AlphaFold") == 'on') {
       console.log("AlphaFold: True")
@@ -104,6 +104,7 @@ export default function form() {
     })
     .then((response) => response.blob())
     .then((blob) => {
+      
       // // Create blob link to download
       // const url = window.URL.createObjectURL(
       //   new Blob([blob]),
@@ -132,6 +133,10 @@ export default function form() {
     });
   };
     
+  const predictorSlider = {
+    IUPred3: 'IUPred3minscore',
+    MetaPredict: 'MetaPredictminscore',
+  };
   return (
     <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
       <div>
@@ -144,7 +149,7 @@ export default function form() {
             <Stack spacing={2}>
               <Stack direction="row" spacing={3}>
                 <FormControlLabel name="IUPred3" control={<Checkbox/>} label="IUPred3" />
-                <InputSlider/>
+                <InputSlider predictorMinScore={predictorSlider.IUPred3} PredName={'IUPred3'}/>
                 <FormControlLabel name='ESpiritz' control={<Checkbox/>} label="ESpiritz" />
                 <FormControlLabel control={<Checkbox/>} name='SPOT-DISORDER' label="SPOT-DISORDER" />
               </Stack>
@@ -155,6 +160,7 @@ export default function form() {
               </Stack>
               <Stack direction="row" spacing={3}>
                 <FormControlLabel control={<Checkbox/>} name='Metapredict' label="Metapredict" />
+                <InputSlider predictorMinScore={predictorSlider.MetaPredict} PredName={'MetaPredict'}/>
                 <FormControlLabel control={<Checkbox/>} name='AlphaFold' label="AlphaFold" />
               </Stack>
             </Stack>

@@ -1,7 +1,7 @@
 def fromseq(seq):
     return seq
 
-def uniprotid(json):
+def identifier(json):
     if json['uniprotid']:
         return json['uniprotid']
     elif json['sequence']:

@@ -11,7 +11,7 @@ const Input = styled(MuiInput)`
   width: 40px;
 `;
 
-export default function InputSlider() {
+export default function InputSlider(props) {
   const [value, setValue] = React.useState(50);
 
   const handleSliderChange = (event, newValue) => {
@@ -33,7 +33,7 @@ export default function InputSlider() {
   return (
     <Box sx={{ width: 150 }}>
       <Typography id="input-slider" gutterBottom>
-        IUPred3 MinScore
+        {props.PredName} MinScore
       </Typography>
       <Grid container spacing={2} alignItems="center">
         <Grid item xs>
@@ -56,7 +56,7 @@ export default function InputSlider() {
               max: 100,
               type: 'number',
               'aria-labelledby': 'input-slider',
-              name: 'IUPred3minscore'
+              name: props.predictorMinScore
             }}
             // label='IUPred3minscore'
           />

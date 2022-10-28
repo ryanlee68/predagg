@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>IUPred3</title>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css"
+          integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
+    <link rel="shortcut icon" type="image/png" href="/static/favico.svg"/>
+
+    <!-- Bootstrap core CSS -->
+    <link href="/static/bootstrap-4.3.1-dist/css/bootstrap.min.css" rel="stylesheet">
+
+
+    <!-- Custom styles for this template -->
+    <link href="/static/css/simple-sidebar.css" rel="stylesheet">
+
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css?family=Lato|Lato:bold">
+    <script type="text/javascript" src="/static/js/jquery.min.js"></script>
+    <!-- Bootstrap core JavaScript -->
+    <script src="/static/bootstrap-4.3.1-dist/js/bootstrap.bundle.min.js"></script>
+    <script type="text/javascript" src="/static/js/jquery.ihavecookies.min.js"></script>
+    <link href="/static/css/gdpr.css" rel="stylesheet">
+
+
+    <style>
+        body {
+            font-family: 'Lato', serif;
+        
+        }
+
+        i {
+            width: 1.1ch;
+        }
+
+        a {
+            color: #17a2b8;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="d-flex" id="wrapper">
+
+    <!-- Sidebar -->
+    <div class="bg-light border-right" id="sidebar-wrapper">
+        <div class="sidebar-heading"><a href="/"><img src="/static/iupred3.png"
+                                                                      width="150px"></a></div>
+        <div class="list-group list-group-flush">
+            <a href="/" class="list-group-item list-group-item-action bg-light" id="predict"><i
+                    class="fas fa-chart-bar"></i>
+                Predictions</a>
+            <a href="/help_new" class="list-group-item list-group-item-action bg-light" id="help"><i
+                    class="fas fa-question"></i> How to use</a>
+            <a href="/examples_new" class="list-group-item list-group-item-action bg-light" id="examples"><i
+                    class="fas fa-book"></i> Examples</a>
+            <a href="/new_features_new" class="list-group-item list-group-item-action bg-light"
+               id="new_features"><i class="fas fa-plus"></i> New features</a>
+            <a href="/statistics_new" class="list-group-item list-group-item-action bg-light"
+               id="statistics"><i
+                    class="fas fa-chart-line"></i> Statistics</a>
+            <a href="/links_new" class="list-group-item list-group-item-action bg-light" id="links"><i
+                    class="fas fa-link"></i> Related links</a>
+            <a href="/download_new" class="list-group-item list-group-item-action bg-light" id="download"><i
+                    class="fas fa-download"></i> Download</a>
+            <a href="/changelog_new" class="list-group-item list-group-item-action bg-light"
+               id="changelog"><i
+                    class="fas fa-exchange-alt"></i> Changelog</a>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            $('#predict').addClass('list-group-item-info')
+                .removeClass('bg-light');
+        });
+        let options = {
+            title: '',
+            message: 'By using IUPred3 you accept the Privacy Notice in compliance with Europe’s new General Data Protection Regulation (GDPR) that applies since 25 May 2018.',
+            link: '/privacy_notice',
+            delay: 500,
+            moreInfoLabel: 'Read the Privacy Notice',
+            advancedBtnLabel: '',
+            acceptBtnLabel: 'I accept the Privacy Notice',
+        };
+        $('body').ihavecookies(options);
+    </script>
+    <!-- /#sidebar-wrapper -->
+    <!-- Page Content -->
+    <div id="page-content-wrapper">
+        <div class="container-fluid">
+
+<script type="application/javascript" src="https://cdn.pydata.org/bokeh/release/bokeh-1.4.0.min.js"></script>
+<script type="text/javascript" src="https://cdn.pydata.org/bokeh/release/bokeh-widgets-1.4.0.min.js"></script>
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script src=/static/js/msa.js></script>
+
+
+<style>
+    .modebar {
+        display: none !important;
+    }
+
+    .js-plotly-plot .plotly .cursor-ew-resize {
+        cursor: crosshair;
+    }
+</style>
+
+<div class="modal fade" id="error_modal" tabindex="-1" role="dialog" aria-labelledby="error_modal" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Error</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        An unexpected error happened while processing your request. <br><br>If the issue persists please contact us at: zsuzsanna.dosztanyi[at]ttk.elte.hu
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card mt-2">
+    <div class="card-header font-weight-bold">
+        <div class="row">
+            <div class="col">
+                <h5 class="font-weight-bold my-auto">
+                    
+                        Input sequence
+                    
+                </h5>
+            </div>
+            <div class="col text-right">
+                <button class="btn btn-info dropdown-toggle" type="button" id="dropdownMenuButton"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Download results
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    <a href="/raw%3F6638593" target="_blank">
+                        <button class="dropdown-item">Text</button>
+                    </a>
+                    <a href="/raw_json%3F6638593" target="_blank">
+                        <button class="dropdown-item">JSON</button>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-body text-justify">
+        <nav>
+            <div class="nav nav-tabs flex-column flex-sm-row" id="nav-tab" role="tablist">
+                <a class="nav-item nav-link flex-sm-fill text-dark text-center active" id="nav-home-tab"
+                   data-toggle="tab" onclick="$('#dropdownMenuButton').show()"
+                   href="#predictions" role="tab"
+                   aria-controls="nav-home" aria-selected="true"><i
+                        class="fas fa-chart-bar"></i> Predictions</a>
+                <a class="nav-item nav-link flex-sm-fill text-dark text-center" id="nav-home-tab"
+                   data-toggle="tab" onclick="load_evo()"
+                   href="#orthologs" role="tab" aria-controls="nav-home" aria-selected="true"><i
+                        class="fas fa-project-diagram"></i> Disorder conservation</a>
+            </div>
+        </nav>
+        <div class="tab-content" id="nav-tabContent">
+            <div class="tab-pane fade text-dark show active"
+                 id="predictions" role="tabpanel"
+                 aria-labelledby="nav-home-tab">
+                <div id="plot" class="text-center my-auto" style="z-index: 1">
+                    <img src="/static/loading_v3.gif" height="160px">
+                </div>
+                
+                
+                <div id="glob_text">
+                </div>
+            </div>
+            <div class="tab-pane fade text-dark mt-2"
+                 id="orthologs" role="tabpanel"
+                 aria-labelledby="nav-home-tab">
+                <div class="row my-auto">
+                    <div class="col my-auto">
+                        <div class="input-group mb-2 mt-2">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Search motif or region</span>
+                            </div>
+                            <input type="text" class="form-control" placeholder="e.g.:1-50 or K.TQT"
+                                   id="region_search_input">
+                            <div class="input-group-append">
+                                <span class="input-group-text bg-info" style="cursor: pointer"
+                                      onclick="show_region()"><i
+                                        class="fas fa-search text-white" autofocus></i></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col text-center my-auto">
+                        <div class="form-group">
+                            <label for="cut_off_slide">Disorder cut-off <span id="cut_off_span">0.5</span></label>
+                            <input type="range" class="form-control-range" id="cut_off_slide" min="1" max="9" value="5"
+                                   onchange="change_cutoff()">
+                        </div>
+                    </div>
+                    <div class="col-1 my-auto">
+                        <button onclick="reset_plot()" class="btn btn-info" data-toggle="tooltip"
+                                data-placement="top" title="Reset the plot"><i class="fas fa-home text-white"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="row pb-0 mb-0">
+                    <div class="col" id="evo_plot_div">
+                        <div id="myDiv" class="text-center my-auto" style="width: 100%">
+                            <img src="/static/loading_v3.gif" height="160px">
+                        </div>
+                    </div>
+                </div>
+                <div class="row pt-0 mt-0">
+                    <div class="col">
+                        <div id="msa">
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-0">
+                    <div class="col">
+                        <table class="table" id="orth_data_table">
+                            <thead>
+                            <tr>
+                                <th>Accession</th>
+                                <th>Name</th>
+                                <th>Protein name</th>
+                            </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    
+
+
+    let aa_color_code = {
+        '-': 'white',
+        'A': '#80a0f0',
+        'I': '#80a0f0',
+        'L': '#80a0f0',
+        'M': '#80a0f0',
+        'F': '#80a0f0',
+        'W': '#80a0f0',
+        'V': '#80a0f0',
+        'K': '#f01505',
+        'R': '#f01505',
+        'E': '#c048c0',
+        'D': '#c048c0',
+        'N': '#15c015',
+        'Q': '#15c015',
+        'S': '#15c015',
+        'T': '#15c015',
+        'C': '#f08080',
+        'G': '#f09048',
+        'P': '#c0c000',
+        'H': '#15a4a4',
+        'Y': '#15a4a4',
+    }
+
+    $.ajax({
+        url: '/plot_api',
+        type: 'GET',
+        dataType: 'json',
+        success: function (data) {
+            $("#plot").html("");
+            Bokeh.embed.embed_item(JSON.parse(data.grid), "plot");
+            if (data['glob_text']) {
+                $("#glob_text").html("<pre>" + data['glob_text'] + "</pre>")
+                    .addClass("mt-4");
+            }
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            $('#error_modal').modal('show')
+        }
+    });
+
+    var previous_selection = false;
+    let layout = {}
+    let iupred_plots = {}
+    let plot_data = [{}];
+    let ort_data = {};
+    let m = msa({})
+
+
+    function load_evo() {
+        let axis_images = ["/static/pics/human.png", "/static/pics/mouse.png", "/static/pics/fish.png", "/static/pics/drozi.png", "/static/pics/celegans.png", "/static/pics/scer.png",]
+        let axis_images_red = ["/static/pics/human_red.png", "/static/pics/mouse_red.png", "/static/pics/fish_red.png", "/static/pics/drozi_red.png", "/static/pics/celegans_red.png", "/static/pics/scer_red.png",]
+        $('#dropdownMenuButton').hide()
+        $.ajax({
+            url: '/motif_disco_api',
+            type: 'GET',
+            dataType: 'json',
+            data: {},
+            success: function (data) {
+                if ($.isEmptyObject(data)) {
+                    $('#orthologs').html('No orthologs found!')
+                    return
+                }
+                layout = {
+                    dragmode: 'pan',
+                    images: [],
+                    autosize: false,
+                    width: document.getElementById("evo_plot_div").offsetWidth - 15,
+                    height: $(window).height() * 0.6,
+
+                    margin: {
+                        r: 10,
+                        b: 0,
+                        t: 30,
+                    },
+                    grid: {rows: 7, columns: 1, pattern: 'independent'},
+                    shapes: [],
+                    annotations: []
+                };
+                let table_content = ''
+                let pic_color = ''
+                $.each(data['accessions'], function (idx, elem) {
+                    table_content += '<tr><td><a target="_blank" href="https://www.uniprot.org/uniprot/' + elem + '">' + elem + '</a></td><td>' + data['proteins'][elem]['entry'] + '</td><td>' + data['proteins'][elem]['name'] + '</td></tr>'
+                    let currvnum = ''
+                    if (idx > 0) {
+                        currvnum = idx + 1
+                    }
+                    if (data['inp_acc'] !== elem) {
+                        pic_color = axis_images[idx]
+                    } else {
+                        pic_color = axis_images_red[idx]
+                    }
+                    let half_line_color = "white"
+                    if (data['plots'][elem].length > 0) {
+                        half_line_color = 'lightgrey'
+                        layout['yaxis' + currvnum] = {
+                            fixedrange: true,
+                            tickvals: [0, 0.5, 1],
+                            range: [0, 1],
+                        }
+                        layout['xaxis' + currvnum] = {showline: true}
+                    } else {
+                        layout['yaxis' + currvnum] = {
+                            fixedrange: true,
+                            tickvals: [],
+                            range: [0, 1],
+                            showline: false,
+                        }
+                        layout['xaxis' + currvnum] = {showline: false, tickvals: []}
+                    }
+
+                    layout.images.push(
+                        {
+                            x: -0.035,
+                            y: 0.8,
+                            sizex: 50,
+                            sizey: 0.6,
+                            source: pic_color,
+                            xref: "paper",
+                            yref: "y" + currvnum,
+                        },
+                    )
+
+                    iupred_plots[currvnum] = data['plots'][elem]
+
+                    plot_data.push(
+                        {
+                            y: [0.5, 0.5],
+                            x: [1, data['plots'][elem].length],
+                            mode: 'lines',
+                            type: 'scatter',
+                            showlegend: false,
+                            line: {color: half_line_color},
+                            xaxis: 'x' + currvnum,
+                            yaxis: 'y' + currvnum,
+                            hoverinfo: "skip",
+                        },
+                        {
+                            y: [1, 1],
+                            x: [1, data['plots'][elem].length],
+                            mode: 'lines',
+                            type: 'scatter',
+                            showlegend: false,
+                            line: {color: '#444444'},
+                            xaxis: 'x' + currvnum,
+                            yaxis: 'y' + currvnum,
+                            hoverinfo: "skip",
+                        },
+                        {
+                            y: data['plots'][elem],
+                            hoverinfo: 'x',
+                            type: 'scatter',
+                            showlegend: false,
+                            line: {color: 'red'},
+                            xaxis: 'x' + currvnum,
+                            yaxis: 'y' + currvnum,
+                        },
+                    )
+                });
+                $('#orth_data_table > tbody').html(table_content)
+                $('[data-toggle="tooltip"]').tooltip()
+                $("#myDiv").html("");
+                Plotly.newPlot('myDiv', plot_data, layout, {scrollZoom: true, responsive: true});
+                ort_data = data
+                update_hover()
+                var rootDiv = document.getElementById("msa");
+                var seqs = msa.io.fasta.parse(data['formatted_aln']);
+                m = msa({
+                    el: rootDiv,
+                    seqs: seqs,
+                    zoomer: {
+                        // general
+                        metaGapWidth: 25,
+                        metaIdentWidth: 30,
+                        metaLinksWidth: 25,
+                        alignmentWidth: Math.max(document.getElementById("orthologs").offsetWidth, document.getElementById("predictions").offsetWidth) - 120,
+                        alignmentHeight: 15 * data['aln_len'],
+                        labelNameLength: 120,
+                        autoResize: false,
+
+                    },
+                    vis: {
+                        conserv: true,
+                        leftHeader: false,
+                        labelId: false,
+                    },
+                });
+                m.g.colorscheme.addStaticScheme("own", aa_color_code);
+                m.g.colorscheme.set("scheme", "own");
+                m.render();
+                $.each(data['aln_acc_color'], function (idx, elem) {
+                    let dom_elem = $('.biojs_msa_labelblock').children().eq(idx)
+                    dom_elem.css('background-color', elem)
+                    dom_elem.children().css('font-weight', 'bold')
+                })
+                $('.biojs_msa_labelblock').children().eq(data['query_pos']).children().eq(0).css('color', 'red')
+                change_cutoff()
+            }
+        });
+    }
+
+    function update_hover() {
+        let offset = Math.round((Math.max(document.getElementById("orthologs").offsetWidth, document.getElementById("predictions").offsetWidth) - 120) / 30)
+        var myPlot = document.getElementById('myDiv');
+        myPlot.on('plotly_hover', function (eventdata) {
+            let idx = ort_data['mappings'][(eventdata.points[0].curveNumber / 3) - 1].indexOf(Math.round(eventdata.xvals))
+            let aln_pos = idx
+            window.onmousemove = function (e) {
+                if (!(e.ctrlKey)) {
+                    m.g.zoomer.setLeftOffset(aln_pos - offset + 2)
+                    let columns = $('.biojs_msa_marker')
+                    simulate(columns.children('span').children('span')[aln_pos], 'click')
+                }
+            }
+            let hover_info = []
+            $.each(ort_data['mappings'], function (idx1, elem) {
+                hover_info.push(
+                    {
+                        curveNumber: (idx1 + 1) * 3,
+                        pointNumber: elem[idx]
+                    }
+                )
+            });
+            Plotly.Fx.hover('myDiv',
+                hover_info,
+                ['xy', 'x2y2', 'x3y3', 'x4y4', 'x5y5', 'x6y6']
+            );
+        });
+    }
+
+    function show_region() {
+        let new_layout = JSON.parse(JSON.stringify(layout))
+        if (Number($("#region_search_input").val().split('-')[0])) {
+            let start = Number($("#region_search_input").val().split('-')[0])
+            let end = Number($("#region_search_input").val().split('-')[1])
+            $.each(ort_data['mappings'], function (idx, elem) {
+                if (ort_data['accessions'][idx] === '-') {
+                    return
+                }
+                let shift = ''
+                if (idx > 0) {
+                    shift = idx + 1
+                }
+                let shifted_start = elem[ort_data['mappings'][0].indexOf(start)]
+                let shitfed_end = elem[ort_data['mappings'][0].indexOf(end)]
+                let n = 0
+                while (shifted_start === null) {
+                    n += 1
+                    shifted_start = elem[ort_data['mappings'][0].indexOf(start) + n]
+                    if (shifted_start > ort_data['sequences'][0].length) {
+                        break
+                    }
+
+                }
+                n = 0
+                while (shitfed_end === null) {
+                    n += 1
+                    shitfed_end = elem[ort_data['mappings'][0].indexOf(end) - n]
+                    if (shitfed_end < 0) {
+                        break
+                    }
+                }
+                if (shitfed_end <= shifted_start) {
+                    return
+                }
+                new_layout.shapes.push(
+                    {
+                        type: 'rect',
+                        x0: shifted_start,
+                        y0: 0,
+                        x1: shitfed_end,
+                        y1: 1,
+                        xref: 'x' + shift,
+                        yref: 'y' + shift,
+                        line: {
+                            color: 'rgba(173,216,230,0.6)',
+                            width: 1
+                        },
+                        fillcolor: 'rgba(173,216,230,0.6)'
+                    },
+                )
+            })
+        } else {
+            $.each(ort_data['sequences'], function (idx, seq) {
+                if (ort_data['accessions'][idx] === '-') {
+                    return
+                }
+                var re = new RegExp($("#region_search_input").val(), "ig");
+                while ((match = re.exec(seq)) != null) {
+                    let shift = ''
+                    if (idx > 0) {
+                        shift = idx + 1
+                    }
+                    new_layout.shapes.push(
+                        {
+                            type: 'rect',
+                            x0: match.index,
+                            y0: 0,
+                            x1: match.index + match[0].length,
+                            y1: 1,
+                            xref: 'x' + shift,
+                            yref: 'y' + shift,
+                            line: {
+                                color: 'rgba(173,216,230,0.6)',
+                                width: 1
+                            },
+                            fillcolor: 'rgba(173,216,230,0.6)'
+                        },
+                    )
+                }
+            })
+        }
+        let graphDiv = document.getElementById('myDiv')
+        Plotly.react('myDiv', graphDiv.data, new_layout, {scrollZoom: true,});
+        update_hover()
+    }
+
+    function change_cutoff() {
+        let cutoff = Number($('#cut_off_slide').val()) / 10
+        $('#cut_off_span').html(cutoff)
+        let new_plot_data = JSON.parse(JSON.stringify(plot_data))
+
+        $.each(iupred_plots, function (currvnum, data) {
+            let filly = []
+            let zeroy = []
+            let fillx = []
+            $.each(data, function (pos, val) {
+                if (val >= cutoff) {
+                    filly.push(val)
+                    zeroy.push(cutoff)
+                    fillx.push(pos)
+                } else {
+                    filly.push(cutoff)
+                    zeroy.push(cutoff)
+                    fillx.push(pos)
+                }
+            })
+            new_plot_data.push(
+                {
+                    y: zeroy,
+                    hoverinfo: "skip",
+                    x: fillx,
+                    mode: 'lines',
+                    type: 'scatter',
+                    showlegend: false,
+                    line: {color: '#ff000040'},
+                    xaxis: 'x' + currvnum,
+                    yaxis: 'y' + currvnum,
+                },
+                {
+                    y: filly,
+                    x: fillx,
+                    hoverinfo: "skip",
+                    type: 'scatter',
+                    showlegend: false,
+                    fill: 'tonexty',
+                    line: {color: '#ff000040'},
+                    fillcolor: '#ff000040',
+                    xaxis: 'x' + currvnum,
+                    yaxis: 'y' + currvnum,
+                },
+            )
+        })
+        let graphDiv = document.getElementById('myDiv')
+        Plotly.react('myDiv', new_plot_data, graphDiv.layout, {scrollZoom: true,});
+        update_hover()
+
+    }
+
+    function simulate(element, eventName) {
+        var options = extend(defaultOptions, arguments[2] || {});
+        var oEvent, eventType = null;
+
+        for (var name in eventMatchers) {
+            if (eventMatchers[name].test(eventName)) {
+                eventType = name;
+                break;
+            }
+        }
+
+        if (!eventType)
+            throw new SyntaxError('Only HTMLEvents and MouseEvents interfaces are supported');
+
+        if (document.createEvent) {
+            oEvent = document.createEvent(eventType);
+            if (eventType == 'HTMLEvents') {
+                oEvent.initEvent(eventName, options.bubbles, options.cancelable);
+            } else {
+                oEvent.initMouseEvent(eventName, options.bubbles, options.cancelable, document.defaultView,
+                    options.button, options.pointerX, options.pointerY, options.pointerX, options.pointerY,
+                    options.ctrlKey, options.altKey, options.shiftKey, options.metaKey, options.button, element);
+            }
+            element.dispatchEvent(oEvent);
+        } else {
+            options.clientX = options.pointerX;
+            options.clientY = options.pointerY;
+            var evt = document.createEventObject();
+            oEvent = extend(evt, options);
+            element.fireEvent('on' + eventName, oEvent);
+        }
+        return element;
+    }
+
+    function extend(destination, source) {
+        for (var property in source)
+            destination[property] = source[property];
+        return destination;
+    }
+
+    function reset_plot() {
+        Plotly.relayout('myDiv', {
+            'xaxis.autorange': true,
+            'yaxis.autorange': true,
+            'xaxis2.autorange': true,
+            'yaxis2.autorange': true,
+            'xaxis3.autorange': true,
+            'yaxis3.autorange': true,
+            'xaxis4.autorange': true,
+            'yaxis4.autorange': true,
+            'xaxis5.autorange': true,
+            'yaxis5.autorange': true,
+            'xaxis6.autorange': true,
+            'yaxis6.autorange': true,
+        });
+    }
+
+    var eventMatchers = {
+        'HTMLEvents': /^(?:load|unload|abort|error|select|change|submit|reset|focus|blur|resize|scroll)$/,
+        'MouseEvents': /^(?:click|dblclick|mouse(?:down|up|over|move|out))$/
+    }
+    var defaultOptions = {
+        pointerX: 0,
+        pointerY: 0,
+        button: 0,
+        ctrlKey: false,
+        altKey: false,
+        shiftKey: false,
+        metaKey: false,
+        bubbles: true,
+        cancelable: true
+    }
+    $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+</script>
+
+<div class="card mt-2">
+    <div class="card-header font-weight-bold small">
+         References
+    </div>
+    <div class="card-body text-justify small">
+        <b>Primary citations</b><br><br>
+	Gábor Erdős, Mátyás Pajkos, Zsuzsanna Dosztányi<br>
+	<a href='https://academic.oup.com/nar/article/49/W1/W297/6287841' target='_blank'>IUPred3: prediction of protein disorder enhanced with unambiguous experimental annotation and visualization of evolutionary conservation</a><br>
+	Nucleic Acids Research 2021;<b>49(W1)</b>:W297-W303.<br><br>
+
+
+        Bálint Mészáros, Gábor Erdős, Zsuzsanna Dosztányi <br>
+        <a href="https://doi.org/10.1093/nar/gky384" target="_blank">IUPred2A: context-dependent prediction of protein disorder as a function of redox state and
+            protein binding</a><br>
+        Nucleic Acids Research 2018;<b>46(W1)</b>:W329-W337.<br><br>
+
+        Gábor Erdős, Zsuzsanna Dosztányi <br>
+        <a href="https://doi.org/10.1002/cpbi.99" target="_blank">Analyzing Protein Disorder with IUPred2A</a><br>
+        Current Protocols in Bioinformatics 2020;<b>70(1)</b>:e99<br><br>
+
+        <b>Additional citations</b><br><br>
+        Zsuzsanna Doszt&aacute;nyi<br>
+            <a href="https://doi.org/10.1002/pro.3334" target="_blank">Prediction of protein disorder based on IUPred</a><br>
+        Protein Science 2017;<b>27</b>:331-340.<br><br>
+
+        Doszt&aacute;nyi Z, Csizm&oacute;k V, Tompa P, Simon I.<br>
+        <a href="https://doi.org/10.1016/j.jmb.2005.01.071" target="_blank">The pairwise energy content estimated from amino acid composition discriminates between folded
+            and intrinsically unstructured proteins</a><br>
+        J Mol Biol. 2005;<b>347</b>:827-39.<br>
+        <br>
+        M&eacute;sz&aacute;ros B, Simon I, Doszt&aacute;nyi Z.<br>
+            <a target="_blank" href="https://doi.org/10.1371/journal.pcbi.1000376">Prediction of protein binding regions in disordered proteins</a><br>
+        PLoS Comput Biol. 2009;<b>5</b>:e1000376.<br>
+
+    </div>
+</div>
+
+</div>
+</div>
+</div>
+<!-- /#wrapper -->
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-137467421-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-137467421-1');
+</script>
+
+
+</body>
+
+</html>
+
+
