@@ -16,37 +16,37 @@ def binaries(array, minscore):
             binarray.append(False)
     return binarray
 
-def predict_uniprot():
-    
-def predict_seq(predictor, prvalue=None, uniprotid=None, sequence=None):
+def predict_uniprot(uniprotid, sequence, predictor, prvalue=None):
+    returnarray = []
+    minscore = float(prvalue[1])*.01
+    if predictor == "IUPred3":
+        URL = f"https://iupred3.elte.hu/iupred3/{uniprotid}.json"
+        response = requests.get(URL)
+        jsonresp = response.json()
+        values = jsonresp['iupred2']
+        returnarray.append(values)
+        returnarray.append(binaries(values, minscore))
+        # print(str(returnarray) + "fdsf")
+    elif predictor == "Metapredict":
+        metaArray = meta.predict_disorder_domains(sequence).disorder
+        returnarray.append(metaArray)
+        returnarray.append(binaries(metaArray, minscore))
+        # print(str(returnarray) + "fdsf")
+
+def predict_seq(sequence, predictor, prvalue=None):
     # returnarrya is an array that contains two arrays:
     # the first array contains the prediction confidence values for each residue
     # the second array contains binary true/false values based on the minscore that the user provided
     returnarray = []
     minscore = float(prvalue[1])*.01
-    if uniprotid:
-        if predictor == "IUPred3":
-            URL = f"https://iupred3.elte.hu/iupred3/{uniprotid}.json"
-            response = requests.get(URL)
-            jsonresp = response.json()
-            values = jsonresp['iupred2']
-            returnarray.append(values)
-            returnarray.append(binaries(values, minscore))
-            # print(str(returnarray) + "fdsf")
-        elif predictor == "Metapredict":
-            metaArray = meta.predict_disorder_domains(sequence).disorder
-            returnarray.append(metaArray)
-            returnarray.append(binaries(metaArray, minscore))
-            # print(str(returnarray) + "fdsf")
-    else:
-        if predictor == "IUPred3":
-            iupredresp = ip3.iupred(sequence)[0]
-            returnarray.append(iupredresp)
-            returnarray.append(binaries(iupredresp, minscore))
-        if predictor == 'Metapredict':
-            metaArray = meta.predict_disorder_domains(sequence).disorder
-            returnarray.append(metaArray)
-            returnarray.append(binaries(metaArray, minscore))
+    if predictor == "IUPred3":
+        iupredresp = ip3.iupred(sequence)[0]
+        returnarray.append(iupredresp)
+        returnarray.append(binaries(iupredresp, minscore))
+    if predictor == 'Metapredict':
+        metaArray = meta.predict_disorder_domains(sequence).disorder
+        returnarray.append(metaArray)
+        returnarray.append(binaries(metaArray, minscore))
 
     return returnarray
 
@@ -102,10 +102,12 @@ def get_df(user_predictors, uniprotid=None, sequence=None):
         print(predictor)
         # print(predict(uniprotid, predictor, predictors[predictor])[0])
         # print(predict(uniprotid, predictor, predictors[predictor])[1])
-        if uniprotid:
-            predictor_results = predict(predictor, prvalue=user_predictors[predictor], uniprotid=uniprotid, sequence=strSequence)
+        print(uniprotid)
+        if uniprotid != 'Unknown':
+            print('uniprotid is invoked')
+            predictor_results = predict_uniprot(uniprotid, strSequence, predictor, prvalue=user_predictors[predictor])
         else:
-            predictor_results = predict(predictor, prvalue=user_predictors[predictor], sequence=sequence)
+            predictor_results = predict_seq(sequence, predictor, prvalue=user_predictors[predictor])
         df[str(predictor)] = pd.Series(predictor_results[0])
         df[str(predictor) + " Scores with >=0." + user_predictors[predictor][1]] = pd.Series(predictor_results[1])
 
