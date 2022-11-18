@@ -1,28 +1,32 @@
-from sqlalchemy import Column
-from sqlalchemy import ForeignKey
-from sqlalchemy import Integer
-from sqlalchemy import String
-from sqlalchemy.orm import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, ForeignKey, String
+from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
+class Canon(Base):
+    __tablename__ = "canons"
 
-class User(Base):
-    __tablename__ = "user_account"
-    id = Column(Integer, primary_key=True)
-    name = Column(String(30))
-    fullname = Column(String)
-    addresses = relationship(
-        "Address", back_populates="user", cascade="all, delete-orphan"
-    )
-    def __repr__(self):
-        return f"User(id={self.id!r}, name={self.name!r}, fullname={self.fullname!r})"
+    id = Column(String, primary_key=True)
+    family_member = Column(String, nullable=False)
+    sequence = Column(String, nullable=False)
+    isoforms = relationship("Isoform")
 
-class Address(Base):
-    __tablename__ = "address"
-    id = Column(Integer, primary_key=True)
-    email_address = Column(String, nullable=False)
-    user_id = Column(Integer, ForeignKey("user_account.id"), nullable=False)
-    user = relationship("User", back_populates="addresses")
     def __repr__(self):
-        return f"Address(id={self.id!r}, email_address={self.email_address!r})"
+        return "<Canon(id='%s', family_member='%s', sequence='%s')>" % (
+            self.id,
+            self.family_member,
+            self.sequence,
+        )
+
+class Isoform(Base):
+    __tablename__ = "isoform"
+
+    id = Column(String, primary_key=True)
+    sequence = Column(String, nullable=False)
+    canon_id = Column(String, ForeignKey("canons.id"))
+
+    def __repr__(self):
+        return "<Isoform(id='%s', sequence='%s', canon_id='%s')>" % (
+            self.id,
+            self.sequence,
+            self.canon_id
+        )
