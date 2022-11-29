@@ -30,3 +30,16 @@ class Isoform(Base):
             self.sequence,
             self.canon_id
         )
+
+class Metascores(Base):
+    __tablename__ = "metascores"
+
+    id = Column(String, primary_key=True)
+    scores = Column(String, nullable=False)
+
+    # def __repr__(self):
+    #     return "<Isoform(id='%s', sequence='%s', canon_id='%s')>" % (
+    #         self.id,
+    #         self.sequence,
+    #         self.canon_id
+    #     )

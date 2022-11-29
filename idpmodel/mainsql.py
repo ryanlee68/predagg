@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine
-from models import Canon, Base, Isoform
+from models import Canon, Base, Isoform, Metascores
 from sqlalchemy.orm import sessionmaker
 
 engine = create_engine("sqlite:///C:\\Users\\ryanl\\OneDrive\\Repos\\predagg\\idpmodel\\finaldata\\main.db", echo=True)
@@ -8,8 +8,8 @@ Session = sessionmaker(bind=engine)
 Base.metadata.create_all(engine)
 
 with Session() as session:
-    canon = session.get(Canon, 'O43497')
-    print(canon.isoforms)
+    # canon = session.get(Canon, 'O43497')
+    # print(canon.isoforms)
 
 # Isoform.__table__.drop(engine)
 # getting info from fasta
