@@ -8,6 +8,8 @@ import numpy as np
 
 import metapredict as meta
 
+import pandas as pd
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 from models import Canon, Isoform
@@ -24,52 +26,61 @@ engine = create_engine("sqlite:////Users/ryanlee/Desktop/Repos/predagg/idpmodel/
 # ^ this is he wrong way, because we're not considering e.g: we get like a sin wave of scores 
 # for canonical, and a zero slope line. the average of both canonical and isoform scores would
 # be zero.
-# So the seond way is to find the difference of each score on each reside and find the absolute value and 
+# So the second way is to find the difference of each score on each reside and find the absolute value and 
 # add all those values up and we will use that number as a baseline to determine how different
 # the scores will be from the canonical and isoform
 
 # *** overall disorderedness
 
-def finddiff(canon):
-    canon_sequence:str = canon.sequence
-    canon_score:list = meta.predict_disorder(canon_sequence)
-    canon_avg_score:float = np.average(canon_score)
-    # print(canon_avg_score)
+# def finddiff(canon):
+    # df = pd.read_csv("maindf.csv")
+    
 
-    canon_isoforms:list = canon.isoforms
-    isoform_sequences:list = [isoform.sequence for isoform in canon_isoforms]
-    # iso_scores:list = [meta.predict_disorder(isoform_sequence) for isoform_sequence in isoform_sequences]
-    iso_scores = []
-    for isoform_sequence in isoform_sequences:
-        try:
-            iso_scores.append(meta.predict_disorder(isoform_sequence))
-        except Exception as e:
-            return None
-    # iso_scores:list = np.array(iso_scores)
-    # print(len(iso_scores))
-    iso_avg_scores:list = [np.average(scores) for scores in iso_scores]
-    # print(iso_avg_scores)
-    # iso_avg_scores2:list = np.mean(iso_scores, axis=1)
-    # print(iso_avg_scores2)
-    # print(iso_avg_scores)
+    # canon_sequence:str = canon.sequence
+    # try:
+    #     canon_score:list = meta.predict_disorder(canon_sequence)
+    # except Exception as e:
+    #     print("this canon sequence is giving an error: " + str(canon_sequence))
+    #     print("uniprotid: " + str(canon.id))
+    #     print(e)
+    #     return []
+    # canon_avg_score:float = np.average(canon_score)
+    # # print(canon_avg_score)
 
-    total_diff:list = np.subtract(canon_avg_score, iso_avg_scores)
-    # print(total_diff)
+    # canon_isoforms:list = canon.isoforms
 
-    return total_diff
+    # iso_scores:list = []
+    # for isoform in canon_isoforms:
+    #     try:
+    #         iso_scores.append(meta.predict_disorder(isoform.sequence))
+    #     except Exception as e:
+    #         print("this isoform sequence is giving an error: " + str(isoform.sequence))
+    #         print("uniprotid: " + str(isoform.id))
+    #         print(e)
+    #         pass
+    # # iso_scores:list = np.array(iso_scores)
+    # # print(len(iso_scores))
+    # iso_avg_scores:list = [np.average(scores) for scores in iso_scores]
+    # # print(iso_avg_scores)
+    # # iso_avg_scores2:list = np.mean(iso_scores, axis=1)
+    # # print(iso_avg_scores2)
+    # # print(iso_avg_scores)
+
+    # total_diff:list = np.subtract(canon_avg_score, iso_avg_scores)
+    # # print(total_diff)
+
+    # return total_diff
 
 with Session(engine) as session:
-    # canon = session.query(Canon).get('P04637')
-    # finddiff(canon)
     canon = session.query(Canon).all()
-    masterlist = []
     for cnon in canon:
         if cnon.isoforms:
-            masterlist.extend(finddiff(cnon))
-            # print(masterlist)
-            # print(finddiff(cnon))
-    with open('difflist.txt', "w") as f:
-        f.write(masterlist)
+            # print(len([cnon.id] + [isoform.id for isoform in cnon.isoforms]))
+            # print(len([cnon.sequence] + [isoform.id for isoform in cnon.isoforms]))
+            df = pd.DataFrame(data={"uniprotid": [cnon.id] + [isoform.id for isoform in cnon.isoforms], 
+            "sequence": [cnon.sequence] + [isoform.id for isoform in cnon.isoforms]})
+            if df['sequence'].str.contains('X') or df['sequence'].str.contains('U'):
+
 
 
 
