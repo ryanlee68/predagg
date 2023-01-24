@@ -15,9 +15,9 @@ from sqlalchemy.orm import Session
 from models import Canon, Isoform
 
 # below is for windows
-# engine = create_engine("sqlite:///C:\\Users\\ryanl\\OneDrive\\Repos\\predagg\\idpmodel\\finaldata\\main.db", echo=True)
+engine = create_engine("sqlite:///C:\\Users\\ryanl\\OneDrive\\Repos\\predagg\\idpmodel\\finaldata\\test.db", echo=False)
 # below is for mac
-engine = create_engine("sqlite:////Users/ryanlee/Desktop/Repos/predagg/idpmodel/finaldata/main.db")
+# engine = create_engine("sqlite:////Users/ryanlee/Desktop/Repos/predagg/idpmodel/finaldata/main.db")
 
 # of the proteins that have isoforms:
 # for x-axis, i need to find the difference of scores between isoform and canonical:
@@ -71,18 +71,39 @@ engine = create_engine("sqlite:////Users/ryanlee/Desktop/Repos/predagg/idpmodel/
 
     # return total_diff
 
+# df = pd.DataFrame(data={"uniprotid": [canon.id] + [isoform.id for isoform in canon.isoforms], 
+#             "sequence": [canon.sequence] + [isoform.id for isoform in canon.isoforms]})
+
+canonmaindf = pd.DataFrame()
+isoformmaindf = pd.DataFrame()
+skippeddf = pd.DataFrame()
+
 with Session(engine) as session:
-    canon = session.query(Canon).all()
-    for cnon in canon:
-        if cnon.isoforms:
-            # print(len([cnon.id] + [isoform.id for isoform in cnon.isoforms]))
-            # print(len([cnon.sequence] + [isoform.id for isoform in cnon.isoforms]))
-            df = pd.DataFrame(data={"uniprotid": [cnon.id] + [isoform.id for isoform in cnon.isoforms], 
-            "sequence": [cnon.sequence] + [isoform.id for isoform in cnon.isoforms]})
-            if df['sequence'].str.contains('X') or df['sequence'].str.contains('U'):
+    canonlist = session.query(Canon).all()
+    for canon in canonlist:
+        # print(canon)
+        if canon.isoforms:
+            if "X" in canon.sequence or "U" in canon.sequence:
+                skippeddf['uniprotid'] = canon.id
+                break
+            for isoform in canon.isoforms:
+                if "X" in isoform.sequence or "U" in isoform.sequence:
+                    skippeddf['uniprotid'] = canon.id
+                    break
+            else:
+                # print("canon sequence \n"canon.sequence + "\n")
+                # print(canon)
+                    # print(type(isoform.sequence))
+                canonmaindf['uniprotid'] = canon.id
+                canonmaindf['sequence'] = canon.sequence
+                canonmaindf['metascore'] = meta.predict_disorder(canon.sequence)
+                
 
-
-
+print(canonmaindf)
+print()
+print(isoformmaindf)
+print()
+print(skippeddf)
 
     # finding overall disorderedness differences between canonical and isoform
     # returns 
