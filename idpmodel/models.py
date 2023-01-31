@@ -6,6 +6,9 @@ from sqlalchemy.orm import declarative_base, relationship
 
 # add dataclasses
 
+# add go column
+# so that we can find new graphs for the go
+
 Base = declarative_base()
 class Canon(Base):
     __tablename__ = "canons"
