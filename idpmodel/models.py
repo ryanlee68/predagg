@@ -17,7 +17,8 @@ class Canon(Base):
     family_member = Column(String, nullable=False)
     sequence = Column(String, nullable=False)
     isoforms = relationship("Isoform")
-    metascore = Column(String, nullable=False)
+    # metascore = Column(String, nullable=True)
+    precentdisordered = Column(Float, nullable=True)
 
     def __repr__(self):
         return "<Canon(id='%s', family_member='%s', sequence='%s', isoforms='%s')>" % (
@@ -33,7 +34,9 @@ class Isoform(Base):
     id = Column(String, primary_key=True)
     sequence = Column(String, nullable=False)
     canon_id = Column(String, ForeignKey("canons.id"))
-    metascore = Column(String, nullable=True)
+    # metascore = Column(String, nullable=True)
+    # TODO change precent disordered to percent disordered
+    precentdisordered = Column(Float, nullable=True)
 
     def __repr__(self):
         return "<Isoform(id='%s', sequence='%s', canon_id='%s')>" % (

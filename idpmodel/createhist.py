@@ -9,40 +9,55 @@ import metapredict as meta
 
 import pandas as pd
 
+import sqlalchemy
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 from models import Canon, Isoform
 
 # below is for windows
-# engine = create_engine("sqlite:///C:\\Users\\ryanl\\OneDrive\\Repos\\predagg\\idpmodel\\finaldata\\test.db", echo=False)
+engine = create_engine("sqlite:///C:\\Users\\ryanl\\OneDrive\\Repos\\predagg\\idpmodel\\finaldata\\acttest.db", echo=False)
 # below is for mac
-engine = create_engine("sqlite:////Users/ryanlee/Desktop/Repos/predagg/idpmodel/finaldata/test.db")
+# engine = create_engine("sqlite:////Users/ryanlee/Desktop/Repos/predagg/idpmodel/finaldata/test.db")
 
-maindf = pd.DataFrame({'uniprotid':[], 'canonavgmeta':[], 'isoavgmeta':[], 'avgdifferences':[]})
+# maindf = pd.DataFrame({'uniprotid':[], 'canonavgmeta':[], 'isoavgmeta':[], 'avgdifferences':[]})
 
+df = pd.read_sql_query(
+    sql = sqlalchemy.select([Canon.id,
+                     Canon.family_member,
+                     Canon.precentdisordered]),
+    con = engine
+)
+id = []
+isolistdisordered = []
 with Session(engine) as session:
-    canonlist = session.query(Canon).all()
-    i = False
-    for canon in canonlist:
-        if canon.metascore:
-            pass
-        for isoform in canon.isoforms:
-            if isoform.metascore:
-                pass
-            else:
-                i = True
-                break
-        if i:
-            i = False
-            pass
-        else:
-            isotot = np.array([])
-            for isoform in canon.isoforms:
-                temp = np.array(map(float, isoform.metascore.split(" ")))
-                isotot.append(temp)
-            df2 = {'uniprotid':canon.id, 'canonavgmeta':[eval(i) for i in canon.metascore.split(" ")], 'isoavgmeta':[], 'avgdifferences':[]}
-            maindf.append(df2, ignore_index=True)
-            # maindf['uniprotid'] = canon.id
-            # print([eval(i) for i in canon.metascore.split(" ")])
-            # maindf['canonavgmeta'] = [eval(i) for i in canon.metascore.split(" ")]
-print(maindf)
+    isoformlistquery = session.query(Isoform).all()
+    for isoform in isoformlistquery:
+        id.append(isoform.canon_id)
+        isolistdisordered.append(isoform.precentdisordered)
+    id.append('O60260')
+    isolistdisordered.append(79.69)
+    isodf = pd.DataFrame({'id': id, 'isolistdisordered': isolistdisordered})
+newdf = pd.merge(df, isodf, on="id")
+newdf['difference'] = newdf['precentdisordered'] - newdf['isolistdisordered']
+print("Type:", type(newdf))
+print()
+
+pd.set_option('display.max_rows', None)
+pd.set_option('display.max_columns', None)
+pd.set_option('display.width', 1000)
+pd.set_option('display.colheader_justify', 'center')
+pd.set_option('display.precision', 2)
+print(newdf)
+newdf.hist()
+
+# with Session(engine) as session:
+#     canonlist = session.query(Canon).all()
+#     df = pd.read_sql_query(canonlist, engine)
+#     # df.to_csv(index=False)
+#     print(df.info())
+#     # print(df)
+#     df.to_csv("C:\\Users\\ryanl\\OneDrive\\Repos\\predagg\\idpmodel\\test.csv", index=False)
+    # # i = False
+    # for canon in canonlist:
+    #     maindf['uniprotid'] = canon.id
+    #     maindf['canonavgmeta'] = 
