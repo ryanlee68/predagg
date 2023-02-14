@@ -27,3 +27,6 @@ __pycache__
 
 # ignore all db files
 *.db
+
+# ignore ipynb checkpoints
+*.ipynb_checkpoints
