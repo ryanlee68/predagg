@@ -1,4 +1,8 @@
-from sqlalchemy import Column, ForeignKey, String, Float, ARRAY, Integer
+# Go annotations:
+# there's a "slimming set", it that describes what variables to define the functions
+# 
+
+from sqlalchemy import Column, ForeignKey, String, Float, ARRAY, Integer, BOOLEAN
 from sqlalchemy.orm import declarative_base, relationship
 
 # there are some proteins in both canonical and isofroms that
@@ -19,6 +23,7 @@ class Canon(Base):
     isoforms = relationship("Isoform")
     # metascore = Column(String, nullable=True)
     precentdisordered = Column(Float, nullable=True)
+    annotations = relationship("Annotation")
 
     def __repr__(self):
         return "<Canon(id='%s', family_member='%s', sequence='%s', isoforms='%s')>" % (
@@ -27,6 +32,15 @@ class Canon(Base):
             self.sequence,
             self.isoforms
         )
+
+class Annotation(Base):
+    __tablename__ = "annotation"
+    id = Column(Integer, primary_key=True)
+    keyword = Column(String, nullable=True)
+    evidence_code = Column(String, nullable=True)
+    publication = Column(BOOLEAN, nullable=False)
+    top_ancestor = Column(String, nullable=True)
+    uniprot_id = Column(String, ForeignKey('canons.id'))
 
 class Isoform(Base):
     __tablename__ = "isoform"
@@ -44,3 +58,4 @@ class Isoform(Base):
             self.sequence,
             self.canon_id
         )
+

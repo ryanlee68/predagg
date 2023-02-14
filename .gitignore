@@ -30,3 +30,5 @@ __pycache__
 
 # ignore ipynb checkpoints
 *.ipynb_checkpoints
+
+*.json
