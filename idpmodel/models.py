@@ -35,12 +35,20 @@ class Canon(Base):
 
 class Annotation(Base):
     __tablename__ = "annotation"
-    id = Column(Integer, primary_key=True)
-    keyword = Column(String, nullable=True)
+    id = Column(Integer, ForeignKey("canons.id"), primary_key=True)
+    go_id = Column(String, nullable=False)
+    reference = Column(String, nullable=True)
     evidence_code = Column(String, nullable=True)
-    publication = Column(BOOLEAN, nullable=False)
-    top_ancestor = Column(String, nullable=True)
-    uniprot_id = Column(String, ForeignKey('canons.id'))
+    go_aspect = Column(String, nullable=True)
+
+    def __repr__(self):
+        return "<Annotation(id='%s', go_id='%s', reference='%s', evidence_code='%s', go_aspect='%s')>" % (
+            self.id,
+            self.go_id,
+            self.reference,
+            self.evidence_code,
+            self.go_aspect
+        )
 
 class Isoform(Base):
     __tablename__ = "isoform"
